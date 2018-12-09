@@ -70,6 +70,49 @@ let addInventory = function () {
     })
 }
 
+let addNewProduct = function () {
+    inquirer.prompt([{
+        type: 'input',
+        message: 'What is the name of the product you would like to add?',
+        name: 'name'
+    }]).then(response => {
+        var name = response.name;
+
+        inquirer.prompt([{
+            type: 'input',
+            message: 'What department would you like your item to be in?',
+            name: 'department'
+        }]).then(response => {
+            var department = response.department;
+
+            inquirer.prompt([{
+                type: 'input',
+                message: 'What is the price of your item?',
+                name: 'price'
+            }]).then(response => {
+                var price = Number(response.price);
+
+                inquirer.prompt([{
+                    type: 'input',
+                    message: 'How many would you like to add?',
+                    name: 'quantity',
+                }]).then(response => {
+                    var quantity = Number(response.quantity);
+
+                    connection.query(
+                        `INSERT INTO products(product_name, department_name, price, stock_quantity)
+                        VALUES(?,?,?,?)`, [name, department, price, quantity], function (err, res) {
+                            if (err) {
+                                console.log(err)
+                            }
+                            viewProducts();
+                        })
+                })
+            })
+        })
+    })
+}
+
 const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product'];
 
 function start() {
