@@ -39,21 +39,41 @@ let customerStart = function () {
             type: 'input',
             message: 'Please enter the id of the item you would like to buy.',
             name: 'id',
-        }]).then(result => {
-            var id = result.id;
+        }]).then(function secondQuery(result) {
+            var idParam = result;
+            var id = idParam.id;
+            connection.query(`SELECT stock_quantity FROM products WHERE item_id = ?`, [id], function (err, res) {
 
-            inquirer.prompt([{
-                type: 'input',
-                message: 'How many would you like to buy?',
-                name: 'quantity'
-            }]).then(result => {
-                var quantity = result.quantity;
+                var stock = res[0].stock_quantity;
 
-                connection.query(`UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?`, [quantity, id])
-                console.log(`You bought ${quantity}`)
+                if (stock <= 0) {
+                    console.log("This item is out of stock, please select another item.")
+                    setTimeout(function(){customerStart()}, 3000);
+                }
 
-                customerStart();
-            })
+                else {
+                    inquirer.prompt([{
+                        type: 'input',
+                        message: 'How many would you like to buy?',
+                        name: 'quantity'
+                    }]).then(result => {
+                        var quantity = result.quantity;
+                        var newQuantity = stock - quantity;
+
+                        if (newQuantity < 0){
+                            console.log(`Insufficient stock available, you can order a maximum of ${stock}`)
+                            setTimeout(function(){secondQuery(idParam)}, 3000)
+                        }
+
+                        else{
+                            connection.query(`UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?`, [quantity, id])
+                            console.log(`You bought ${quantity}`)
+    
+                            customerStart();
+                        }
+                    })
+                }
+            });
         })
     })
 }
