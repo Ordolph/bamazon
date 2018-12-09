@@ -31,7 +31,7 @@ let customerStart = function () {
             console.log(err);
         }
         buildTable(res);
-
+        // Item selection prompt
         inquirer.prompt([{
             type: 'input',
             message: 'Please enter the id of the item you would like to buy.',
@@ -43,12 +43,12 @@ let customerStart = function () {
                 var stock = res[0].stock_quantity;
                 var price = res[0].price;
                 console.log(price);
-            // Checks if selected item is in stock
+            // Checks if selected item is in stock, if not, returns customer to item selection prompt
                 if (stock <= 0) {
                     console.log("This item is out of stock, please select another item.")
                     setTimeout(function(){customerStart()}, 3000);
                 }
-
+                // Quantity selection prompt
                 else {
                     inquirer.prompt([{
                         type: 'input',
