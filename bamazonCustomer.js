@@ -1,10 +1,10 @@
-const fs = require("fs");
+// Requirements for various node modules
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const Table = require("cli-table");
-
 require('dotenv').config();
 
+// MySql db connection
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -12,6 +12,7 @@ const connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
+// Function to build cli table
 let buildTable = function (res) {
     var table = new Table({
         head: ['Product ID', 'Product Name', 'Department', 'Price', 'Stock'],
@@ -23,6 +24,7 @@ let buildTable = function (res) {
     console.log(table.toString());
 }
 
+// Function that runs customer through series of prompts and adjusts visual table and MySql table accordingly
 let customerStart = function () {
     connection.query('SELECT * FROM products', function (err, res) {
         if (err) {
@@ -41,7 +43,7 @@ let customerStart = function () {
                 var stock = res[0].stock_quantity;
                 var price = res[0].price;
                 console.log(price);
-            
+            // Checks if selected item is in stock
                 if (stock <= 0) {
                     console.log("This item is out of stock, please select another item.")
                     setTimeout(function(){customerStart()}, 3000);
@@ -56,12 +58,12 @@ let customerStart = function () {
                         var quantity = result.quantity;
                         var newQuantity = stock - quantity;
                         var totalPrice = price * quantity;
-
+                        // Checks if suffiecient quantity of selected item is available, returns to allow customer to select new quantity if insufficient
                         if (newQuantity < 0){
                             console.log(`Insufficient stock available, you can order a maximum of ${stock}`)
                             setTimeout(function(){secondQuery(idParam)}, 3000)
                         }
-
+                        // Returns amount of item purchased and total purchase cost, then returns customer to beginning of prompts
                         else{
                             connection.query(`UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?`, [quantity, id])
                             console.log(`You bought ${quantity} for a total of $${totalPrice}.`)
