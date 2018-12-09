@@ -39,14 +39,14 @@ let customerStart = function () {
         }]).then(function secondQuery(result) {
             var idParam = result;
             var id = idParam.id;
-            connection.query(`SELECT stock_quantity, price FROM products WHERE item_id = ?`, [id], function (err, res) {
+            connection.query(`SELECT stock_quantity, price, department_name FROM products WHERE item_id = ?`, [id], function (err, res) {
                 var stock = res[0].stock_quantity;
                 var price = res[0].price;
-                console.log(price);
-            // Checks if selected item is in stock, if not, returns customer to item selection prompt
+                var dept = res[0].department_name;
+                // Checks if selected item is in stock, if not, returns customer to item selection prompt
                 if (stock <= 0) {
                     console.log("This item is out of stock, please select another item.")
-                    setTimeout(function(){customerStart()}, 3000);
+                    setTimeout(function () { customerStart() }, 3000);
                 }
                 // Quantity selection prompt
                 else {
@@ -59,16 +59,35 @@ let customerStart = function () {
                         var newQuantity = stock - quantity;
                         var totalPrice = price * quantity;
                         // Checks if suffiecient quantity of selected item is available, returns to allow customer to select new quantity if insufficient
-                        if (newQuantity < 0){
+                        if (newQuantity < 0) {
                             console.log(`Insufficient stock available, you can order a maximum of ${stock}`)
-                            setTimeout(function(){secondQuery(idParam)}, 3000)
+                            setTimeout(function () { secondQuery(idParam) }, 3000)
                         }
                         // Returns amount of item purchased and total purchase cost, then returns customer to beginning of prompts
-                        else{
-                            connection.query(`UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?`, [quantity, id])
-                            console.log(`You bought ${quantity} for a total of $${totalPrice}.`)
-    
-                            setTimeout(function(){customerStart()}, 3000);
+                        else {
+                            connection.query(`SELECT product_sales FROM departments WHERE departments.department_name = ?`, dept, function (err, res) {
+                                if (err) {
+                                    console.log(err)
+                                }
+                                else {
+                                    var sales = res[0].product_sales;
+                                    var newSales = sales + totalPrice;
+
+                                    connection.query(`UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?`, [quantity, id], function (err) {
+                                        if (err) {
+                                            console.log(err)
+                                        }
+                                    })
+                                    connection.query(`UPDATE departments SET product_sales = ? WHERE departments.department_name = ?`, [totalPrice, dept], function (err) {
+                                        if (err) {
+                                            console.log(err);
+                                        }
+                                    })
+                                    console.log(`You bought ${quantity} for a total of $${totalPrice}.`)
+
+                                    setTimeout(function () { customerStart() }, 3000);
+                                }
+                            })
                         }
                     })
                 }
