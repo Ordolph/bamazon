@@ -37,7 +37,38 @@ let viewLowInventory = function () {
     connection.query(`SELECT * FROM products WHERE stock_quantity < 6`, function (err, res) {
         buildTables(err, res);
     }
-)}
+    )
+}
+
+let addInventory = function () {
+    inquirer.prompt([{
+        type: 'input',
+        message: 'Please enter the ID of the item you would like to add inventory to.',
+        name: 'id'
+    }]).then(response => {
+        var id = response.id;
+        console.log(id)
+        connection.query(`SELECT stock_quantity, product_name FROM products WHERE item_id = ?`, id, function (err, res) {
+            if (err) {
+                console.log(err)
+            }
+            let stock = Number(res[0].stock_quantity);
+            let name = res[0].product_name;
+
+            inquirer.prompt([{
+                type: 'input',
+                message: `There are currently ${stock} of ${name}, how many would you like to add?`,
+                name: 'quantity',
+            }]).then(response => {
+                var quantity = Number(response.quantity);
+                var newQuantity = quantity + stock;
+
+                connection.query(`UPDATE products SET stock_quantity = ? WHERE item_id = ?`, [newQuantity, id]);
+                viewProducts();
+            })
+        })
+    })
+}
 
 const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product'];
 
