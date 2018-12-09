@@ -12,17 +12,23 @@ const connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
-// Function to build cli table
-// let viewProducts = function () {
-//     var table = new Table({
-//         head: ['Product ID', 'Product Name', 'Department', 'Price', 'Stock'],
-//     })
-
-//     for (i = 0; i < res.length; i++) {
-//         table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity])
-//     }
-//     console.log(table.toString());
-// }
+let viewProducts = function () {
+    var table = new Table({
+        head: ['Product ID', 'Product Name', 'Department', 'Price', 'Stock'],
+    })
+    connection.query(`SELECT * FROM products`, function(err, res) {
+        if(err){
+            throw err;
+        }
+        else{
+            for (i = 0; i < res.length; i++) {
+                table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity])
+            }
+            console.log(table.toString());
+            setTimeout(function(){start()}, 3000);
+        }
+    })
+}
 
 const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product'];
 
@@ -33,7 +39,7 @@ function start() {
         name: 'command',
         choices: options
     }]).then(command => {
-        switch (command) {
+        switch (command.command) {
             case options[0]:
                 viewProducts();
                 break;
