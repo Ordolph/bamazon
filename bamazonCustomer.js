@@ -15,20 +15,15 @@ const connection = mysql.createConnection({
 let buildTable = function (res) {
     var table = new Table({
         head: ['Product ID', 'Product Name', 'Department', 'Price', 'Stock'],
-        // colWidths: [100, 100, 100, 100, 100],
     })
 
     for (i = 0; i < res.length; i++) {
         table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity])
     }
-    // table.push(tableData);
     console.log(table.toString());
 }
 
-
-
 let customerStart = function () {
-
     connection.query('SELECT * FROM products', function (err, res) {
         if (err) {
             console.log(err);
@@ -42,10 +37,11 @@ let customerStart = function () {
         }]).then(function secondQuery(result) {
             var idParam = result;
             var id = idParam.id;
-            connection.query(`SELECT stock_quantity FROM products WHERE item_id = ?`, [id], function (err, res) {
-
+            connection.query(`SELECT stock_quantity, price FROM products WHERE item_id = ?`, [id], function (err, res) {
                 var stock = res[0].stock_quantity;
-
+                var price = res[0].price;
+                console.log(price);
+            
                 if (stock <= 0) {
                     console.log("This item is out of stock, please select another item.")
                     setTimeout(function(){customerStart()}, 3000);
@@ -59,6 +55,7 @@ let customerStart = function () {
                     }]).then(result => {
                         var quantity = result.quantity;
                         var newQuantity = stock - quantity;
+                        var totalPrice = price * quantity;
 
                         if (newQuantity < 0){
                             console.log(`Insufficient stock available, you can order a maximum of ${stock}`)
@@ -67,9 +64,9 @@ let customerStart = function () {
 
                         else{
                             connection.query(`UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?`, [quantity, id])
-                            console.log(`You bought ${quantity}`)
+                            console.log(`You bought ${quantity} for a total of $${totalPrice}.`)
     
-                            customerStart();
+                            setTimeout(function(){customerStart()}, 3000);
                         }
                     })
                 }
