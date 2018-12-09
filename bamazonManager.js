@@ -12,23 +12,32 @@ const connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
-let viewProducts = function () {
+let buildTables = function (err, res) {
     var table = new Table({
         head: ['Product ID', 'Product Name', 'Department', 'Price', 'Stock'],
     })
-    connection.query(`SELECT * FROM products`, function(err, res) {
-        if(err){
-            throw err;
+    if (err) {
+        throw err;
+    }
+    else {
+        for (i = 0; i < res.length; i++) {
+            table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity])
         }
-        else{
-            for (i = 0; i < res.length; i++) {
-                table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity])
-            }
-            console.log(table.toString());
-            setTimeout(function(){start()}, 3000);
-        }
+        console.log(table.toString());
+        setTimeout(function () { start() }, 3000);
+    }
+}
+let viewProducts = function () {
+    connection.query(`SELECT * FROM products`, function (err, res) {
+        buildTables(err, res);
     })
 }
+
+let viewLowInventory = function () {
+    connection.query(`SELECT * FROM products WHERE stock_quantity < 6`, function (err, res) {
+        buildTables(err, res);
+    }
+)}
 
 const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product'];
 
