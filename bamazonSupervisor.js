@@ -12,8 +12,7 @@ const connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
-const options = ['View sales by department.', 'Add new department', 'Quit'];
-
+// Funtion to dispaly sales by department.
 let displaySalesByDept = function () {
     var table = new Table({
         head: ['Department ID', 'Department Name', 'Overhead Cost', 'Product Sales', 'Profit'],
@@ -48,6 +47,7 @@ let displaySalesByDept = function () {
     })
 }
 
+// Function to add new department
 let addNewDept = function () {
     inquirer.prompt([{
         type: 'input',
@@ -87,6 +87,10 @@ let addNewDept = function () {
     })
 }
 
+// Inquirer choices
+const options = ['View sales by department.', 'Add new department', 'Quit'];
+
+// Inquirer command prompt.
 let start = function () {
     inquirer.prompt([{
         type: 'list',

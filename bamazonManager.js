@@ -12,6 +12,7 @@ const connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
+// Function to build display table
 let buildTables = function (err, res) {
     var table = new Table({
         head: ['Product ID', 'Product Name', 'Department', 'Price', 'Stock'],
@@ -27,12 +28,15 @@ let buildTables = function (err, res) {
         setTimeout(function () { start() }, 3000);
     }
 }
+
+// Shows all products
 let viewProducts = function () {
     connection.query(`SELECT * FROM products`, function (err, res) {
         buildTables(err, res);
     })
 }
 
+// Shows low inventory
 let viewLowInventory = function () {
     connection.query(`SELECT * FROM products WHERE stock_quantity < 6`, function (err, res) {
         buildTables(err, res);
@@ -40,6 +44,7 @@ let viewLowInventory = function () {
     )
 }
 
+// Function to add inventory to existing items
 let addInventory = function () {
     inquirer.prompt([{
         type: 'input',
@@ -70,6 +75,7 @@ let addInventory = function () {
     })
 }
 
+// Function to add new products
 let addNewProduct = function () {
     inquirer.prompt([{
         type: 'input',
@@ -113,8 +119,10 @@ let addNewProduct = function () {
     })
 }
 
+// Inquirer command options
 const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product', 'Quit'];
 
+// Initial command prompt
 function start() {
     inquirer.prompt([{
         type: 'list',
