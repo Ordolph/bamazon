@@ -113,7 +113,7 @@ let addNewProduct = function () {
     })
 }
 
-const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product'];
+const options = ['View products', 'View low inventory', 'Add inventory', 'Add New Product', 'Quit'];
 
 function start() {
     inquirer.prompt([{
@@ -135,6 +135,9 @@ function start() {
             case options[3]:
                 addNewProduct();
                 break;
+            case options[4]:
+                console.log("Goodbye.")
+                connection.end();
         }
     })
 }

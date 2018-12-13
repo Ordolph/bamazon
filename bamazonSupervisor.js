@@ -12,7 +12,7 @@ const connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
-const options = ['View sales by department.', 'Add new department'];
+const options = ['View sales by department.', 'Add new department', 'Quit'];
 
 let displaySalesByDept = function () {
     var table = new Table({
@@ -48,6 +48,45 @@ let displaySalesByDept = function () {
     })
 }
 
+let addNewDept = function () {
+    inquirer.prompt([{
+        type: 'input',
+        name: 'name',
+        message: 'What is the name of the new department?'
+    }]).then(result => {
+        let deptName = result.name;
+
+        inquirer.prompt([{
+            type: 'input',
+            name: 'overhead',
+            message: 'What is the overhead cost of this department?',
+            default: 0
+        }]).then(result => {
+            let deptOverhead = Number(result.overhead);
+
+            inquirer.prompt([{
+                type: 'input',
+                name: 'sales',
+                message: 'What is the current sales value of this department?',
+                default: 0
+            }]).then(result => {
+                let sales = Number(result.sales);
+
+                connection.query(`INSERT INTO departments(department_name, overhead_costs, product_sales)
+                 VALUES( ?, ?, ?)`, [deptName, deptOverhead, sales],
+                    function (err, res) {
+                        if (err) {
+                            console.log(err);
+                            start();
+                        }
+                        displaySalesByDept();
+                    }
+                )
+            })
+        })
+    })
+}
+
 let start = function () {
     inquirer.prompt([{
         type: 'list',
@@ -65,6 +104,9 @@ let start = function () {
             case options[1]:
                 addNewDept();
                 break;
+            case options[2]:
+                console.log("Goodbye.");
+                connection.end();
         }
     })
 }

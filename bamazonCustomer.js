@@ -25,7 +25,7 @@ let buildTable = function (res) {
 }
 
 // Function that runs customer through series of prompts and adjusts visual table and MySql table accordingly
-let customerStart = function () {
+let purchase = function () {
     connection.query('SELECT * FROM products', function (err, res) {
         if (err) {
             console.log(err);
@@ -39,6 +39,7 @@ let customerStart = function () {
         }]).then(function secondQuery(result) {
             var idParam = result;
             var id = idParam.id;
+
             connection.query(`SELECT stock_quantity, price, department_name FROM products WHERE item_id = ?`, [id], function (err, res) {
                 var stock = res[0].stock_quantity;
                 var price = res[0].price;
@@ -46,7 +47,7 @@ let customerStart = function () {
                 // Checks if selected item is in stock, if not, returns customer to item selection prompt
                 if (stock <= 0) {
                     console.log("This item is out of stock, please select another item.")
-                    setTimeout(function () { customerStart() }, 3000);
+                    setTimeout(function () { purchase() }, 3000);
                 }
                 // Quantity selection prompt
                 else {
@@ -85,7 +86,7 @@ let customerStart = function () {
                                     })
                                     console.log(`You bought ${quantity} for a total of $${totalPrice}.`)
 
-                                    setTimeout(function () { customerStart() }, 3000);
+                                    setTimeout(function () {start() }, 3000);
                                 }
                             })
                         }
@@ -96,8 +97,27 @@ let customerStart = function () {
     })
 }
 
-customerStart();
+const options = ['Make a purchase.', 'Quit']
 
+let start = function () {
+    inquirer.prompt([{
+        type: 'list',
+        name: 'command',
+        message: 'What would you like to do?',
+        choices: options
+    }]).then(result => {
+        switch (result.command) {
+            case options[0]:
+                purchase();
+                break;
+            case options[1]:
+                console.log("Goodbye.")
+                connection.end();
+        }
+    })
+}
+
+start();
 
 
 
