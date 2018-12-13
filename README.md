@@ -1,2 +1,2 @@
 # bamazon
-node cli app with MySql, and inquirer.
+CLI shop sales manager that uses MySql, inquirer, and cli-table.
